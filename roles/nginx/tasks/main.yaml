@@ -1,0 +1,15 @@
+---
+- name: Install Nginx
+  ansible.builtin.package:
+    name: nginx
+    state: present
+
+- name: Copy Nginx configuration file
+  template:
+    src: nginx_config.j2
+    dest: /etc/nginx/sites-available/default
+
+- name: Restart Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted

@@ -1,0 +1,2 @@
+[azure-linux-vm]
+aim-qm-vm ansible_host=10.94.95.4 ansible_user=aim-qm-user ansible_ssh_private_key_file=~/.ssh/aim-qm-vm_key.pem

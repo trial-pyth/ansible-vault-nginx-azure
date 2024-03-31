@@ -1,0 +1,19 @@
+[Unit]
+Description=a tool for managing secrets
+Documentation=https://vaultproject.io/docs/
+After=network.target
+ConditionFileNotEmpty=~/vault/vault-config.hcl
+
+[Service]
+ExecStart=/usr/local/bin/vault server -config=~/vault/vault-config.hcl
+ExecReload=/usr/local/bin/kill --signal HUP $MAINPID
+CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
+Capabilities=CAP_IPC_LOCK+ep
+SecureBits=keep-caps
+NoNewPrivileges=yes
+KillSignal=SIGINT
+
+# This directive specifies the target unit(s) that should "want" (or require) this unit. When a target unit is activated, systemd also activates all units that it "wants". In this case, 
+# multi-user.target is specified, which is a target unit representing a system state where multiple users are logged in and the system is fully operational.
+[Install]
+WantedBy=multi-user.target

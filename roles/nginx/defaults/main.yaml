@@ -1,0 +1,4 @@
+---
+server_name: aim-qm-vm.aimqm.app
+ssl_certificate_path: ~/vault/aim-qm-vm.aimqm.app.crt
+ssl_certificate_key_path: ~/vault/aim-qm-vm.aimqm.app.key

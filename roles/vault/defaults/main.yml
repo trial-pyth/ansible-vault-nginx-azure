@@ -1,0 +1,5 @@
+---
+vault_version: "1.16"
+vault_checksum: "sha256:0566a426db86c398d32192b1953fb2efb02ff2879253c66a5d162ad8d9290f2e"
+vault_install_prerequisites: ['unzip']
+vault_config_path: "~/vault/vault-config.hcl"

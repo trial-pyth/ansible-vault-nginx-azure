@@ -1,0 +1,23 @@
+# defaults/main.yaml
+# File path for audit logging
+vault_audit_log_path: "~/vault/logs/vault_audit.log"
+vault_jwt_auth_path: "~/vault/config.json"
+
+# Secret engine name
+kv_secret_engine_name: "QMToken"
+
+# Configurations for config.json template
+config_json_data:
+  name: "qm-action-role"
+  role_type: "jwt"
+  user_claim: "repository"
+  bound_audiences:
+    - "https://github.softwareag.com/AIM"
+  bound_claims_type: "string"
+  bound_claims:
+    job_workflow_ref:
+      # Authorize all workflows in the repository
+      - "<OWNER | ORG>/<REPO_NAME>/.github/workflows/*.yaml@refs/heads/<ref>"
+  ttl: "100"
+  token_policies:
+    - "qm-secrets-policy"

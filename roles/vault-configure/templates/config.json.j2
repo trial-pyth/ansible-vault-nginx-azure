@@ -1,0 +1,24 @@
+{
+    "name": "{{ config_json_data.name }}",
+    "role_type": "{{ config_json_data.role_type }}",
+    "user_claim": "{{ config_json_data.user_claim }}",
+    "bound_audiences": [
+        {% for audience in config_json_data.bound_audiences %}
+        "{{ audience }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ],
+    "bound_claims_type": "{{ config_json_data.bound_claims_type }}",
+    "bound_claims": {
+        {% for claim_key, claim_value in config_json_data.bound_claims.items() %}
+        "{{ claim_key }}": [{% for value in claim_value %}
+            "{{ value }}"{% if not loop.last %},{% endif %}
+        {% endfor %}]{% if not loop.last %},{% endif %}
+        {% endfor %}
+    },
+    "ttl": "{{ config_json_data.ttl }}",
+    "token_policies": [
+        {% for policy in config_json_data.token_policies %}
+        "{{ policy }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+}

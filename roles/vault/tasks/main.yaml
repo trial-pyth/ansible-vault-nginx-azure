@@ -1,0 +1,58 @@
+---
+- name: Install prerequisites
+  package:
+    name: "{{ item }}"
+    update_cache: yes
+  with_items: "{{ vault_install_prerequisites }}"
+  become: true
+
+- name: Create directories for Vault
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - ~/vault
+    - ~/vault/data
+    - ~/logs
+
+- name: Download binary
+  get_url:
+    url: https://releases.hashicorp.com/vault/{{vault_version}}/vault_{{vault_version}}_linux_amd64.zip
+    dest: /tmp/vault_{{vault_version}}_linux_amd64.zip
+    # Allow owner:+rwx group:+rw others:+rw
+    mode: 0755
+    # Verify integrity
+    checksum: "{{vault_checksum}}"
+  register: vault_download
+
+- name: "Unzip vault archive"
+  unarchive:
+    src: "{{ vault_download.dest }}"
+    dest: /usr/local/bin
+    copy: no
+    mode: 0755
+
+- name: "Set vault binary capabilities"
+  capabilities:
+    path: /usr/local/bin/vault
+    # This capability allows the process to lock memory into RAM, which can be useful for preventing the system from swapping Vault's sensitive data to disk. +ep indicates both effective (e) and permitted (p) capabilities.
+    capability: cap_ipc_lock+ep
+    state: present
+
+- name: Copy systemd init file
+  template:
+    src: init.service.j2
+    dest: /etc/systemd/system/vault.service
+  # handler  
+  notify: systemd_reload
+
+- name: config file
+  template:
+    src: vault-config.hcl.j2
+    dest: "{{ vault_config_path }}"
+
+- name: vault service
+  service:
+    name: vault
+    state: started
+    enabled: yes

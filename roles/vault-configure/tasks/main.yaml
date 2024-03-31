@@ -1,0 +1,47 @@
+# tasks/main.yaml
+
+- name: Enable audit logging
+  file:
+    path: "{{ vault_audit_log_path | dirname }}"
+    state: directory
+  delegate_to: localhost
+
+- name: Enable Vault file audit log
+  shell: "vault audit enable file file_path={{ vault_audit_log_path }}"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+  delegate_to: localhost
+
+- name: Create KV secret engine
+  shell: "vault secrets enable -path={{ kv_secret_engine_name }} kv"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+
+- name: Generate config.json
+  template:
+    src: config.json.j2
+    dest: "{{vault_jwt_auth_path}}"
+
+- name: Enable JWT auth
+  shell: "vault auth enable jwt"
+
+- name: Write config.json to Vault
+  shell: "vault write auth/jwt/config oidc_discovery_url='https://github.softwareag.com/_services/token' bound_issuer='https://github.softwareag.com/_services/token'"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+
+- name: Write role to Vault
+  shell: "vault write auth/jwt/role/{{ config_json_data.name }} {{vault_jwt_auth_path}}"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+
+- name: Display policies for the role
+  shell: "vault read auth/jwt/role/{{ config_json_data.name }}"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+
+- name: Grant read capabilities for the policy and secret path
+  shell: |
+    echo 'path "QMToken/data/privateKey" { capabilities = ["read"] }' | vault policy write qm-secrets-policy -
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
